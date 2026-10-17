@@ -12,15 +12,6 @@ The problem is written as a QUBO (tug uniqueness in the tidal window, wind- and 
 tug demand, crew availability, spot-ship revenue), mapped to an Ising Hamiltonian and solved with
 QAOA, with constraint-based error detection and repair of measured bitstrings.
 
-## Status
-
-- Exact solver (dimod) and QAOA agree on small instances (e.g. 4 tugs, 4 ships, 18 qubits).
-- QAOA with 2 layers finds the optimum reliably in calm wind; it is weaker in high wind.
-- So far run on simulators only, including a simulated noisy IBM backend. Not yet run on a real IBM QPU.
-
-Details and evidence: [docs/FIXES_2026-10-17.md](docs/FIXES_2026-10-17.md),
-benchmark output in [results/](results/).
-
 ## Run it
 
 Python 3.13+ with `qiskit`, `qiskit-ibm-runtime`, `dimod`, `numpy`, `scipy`, `matplotlib`.
@@ -48,7 +39,7 @@ docs/                fix notes and project log
 
 ## Team
 
-- **Melinoë Elizondo**, Project Lead (PhD Physicist)
+- **Melinoë Elizondo**, Project Lead and Chief Scientist
 - **Rene Borda**, Concept Originator and Market Expert
 - **Francesca Dumary**, Software Engineer
 - **Ryan Bullock**, Business Strategy
