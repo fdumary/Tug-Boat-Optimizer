@@ -20,6 +20,7 @@ import matplotlib.pyplot as plt
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "src")))
 
 import dimod
+from qiskit.quantum_info import Statevector
 from tug_optimizer import (
     Ship,
     Tug,
@@ -71,6 +72,13 @@ def run_benchmark():
         max_energy = classical_res.data_vectors['energy'].max()
         min_energy = ground_truth_energy
 
+        # QUBO energy of every basis state, in Qiskit index order (variable i = bit i)
+        Q, q_offset = optimizer.to_qubo_matrix()
+        n = optimizer.num_variables
+        idx = np.arange(1 << n)
+        X = ((idx[:, None] >> np.arange(n)) & 1).astype(np.float64)
+        all_energies = np.einsum("ki,ij,kj->k", X, Q, X) + q_offset
+
         print(f"  Classical Optimal Energy: {ground_truth_energy:.1f}")
         print(f"  Classical Accepted Spot Ships: {optimizer.decode_solution(ground_truth_sample)['accepted_spot_ships']}")
 
@@ -95,10 +103,10 @@ def run_benchmark():
             samples = sim.sample_probabilities(opt_params, top_k=10, apply_qec=False)
 
             # Check ground state overlap
-            ground_truth_prob = 0.0
-            for bitstr, prob, energy, decoded in samples:
-                if abs(energy - ground_truth_energy) < 1e-4:
-                    ground_truth_prob += prob
+            # Sum over ALL optimal bitstrings: the optimum is degenerate (tugs are interchangeable),
+            # so no single bitstring need appear in the top samples
+            probs = Statevector.from_instruction(sim.bind_parameters(opt_params)).probabilities()
+            ground_truth_prob = float(probs[all_energies <= ground_truth_energy + 1e-4].sum())
 
             approx_ratio = (max_energy - raw_exp_energy) / (max_energy - min_energy) if max_energy != min_energy else 1.0
 
@@ -106,7 +114,7 @@ def run_benchmark():
             print(f"  Optimal Parameters (gamma, beta): {np.round(opt_params, 4)}")
             print(f"  Expected QUBO Energy: {raw_exp_energy:.1f}")
             print(f"  Approximation Ratio: {approx_ratio:.4f}")
-            print(f"  Ground State Overlap (Top samples): {ground_truth_prob * 100:.3f}%")
+            print(f"  Ground State Overlap (all optimal states): {ground_truth_prob * 100:.3f}%")
             print(f"  Optimization Runtime: {elapsed:.2f}s")
 
             results.append({

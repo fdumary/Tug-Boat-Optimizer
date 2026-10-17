@@ -4,38 +4,31 @@
     "p_layers": 1,
     "circuit_depth": 24,
     "rzz_gates": 56,
-    "approx_ratio": 1.190890974779285,
-    "expected_energy": -338668.71344382537,
+    "approx_ratio": 0.7922469215076318,
+    "expected_energy": 196467.79462895222,
     "ground_truth_energy": -9000.0,
     "opt_params": [
-      0.7319384975651981,
-      2.5965438978772597
+      2.1597794822366585,
+      0.31733003022227824
     ],
     "top_samples": [
       {
-        "bitstring": "110000000000000000",
-        "prob": 0.0060585903356286195,
-        "energy": 49500.0,
-        "accepted_spot": [
-          "Spot Bulk Carrier (220m)",
-          "Spot Tanker (280m)"
-        ]
+        "bitstring": "000011101001100011",
+        "prob": 8.738124100065954e-05,
+        "energy": 280000.0,
+        "accepted_spot": []
       },
       {
-        "bitstring": "100000000000000000",
-        "prob": 0.003915121448002796,
-        "energy": 39500.0,
-        "accepted_spot": [
-          "Spot Tanker (280m)"
-        ]
+        "bitstring": "000011001101101010",
+        "prob": 8.738124100065952e-05,
+        "energy": 280000.0,
+        "accepted_spot": []
       },
       {
-        "bitstring": "010000000000000000",
-        "prob": 0.003884218403733743,
-        "energy": 40000.0,
-        "accepted_spot": [
-          "Spot Bulk Carrier (220m)"
-        ]
+        "bitstring": "000011001110100110",
+        "prob": 8.738124100065952e-05,
+        "energy": 280000.0,
+        "accepted_spot": []
       }
     ]
   },
@@ -44,39 +37,41 @@
     "p_layers": 2,
     "circuit_depth": 47,
     "rzz_gates": 112,
-    "approx_ratio": 1.0813606190603813,
-    "expected_energy": -149509.78911727827,
+    "approx_ratio": 0.933214518211454,
+    "expected_energy": 57050.84148887211,
     "ground_truth_energy": -9000.0,
     "opt_params": [
-      1.9889070978495444,
-      1.3549851503412007,
-      0.5057242669281408,
-      0.8066701383198781
+      1.243586510797574,
+      0.8657446099992356,
+      0.8379706320874328,
+      1.1574665054702447
     ],
     "top_samples": [
       {
-        "bitstring": "110000000000000000",
-        "prob": 0.008595546620707167,
-        "energy": 49500.0,
+        "bitstring": "111100000000000000",
+        "prob": 0.002767876743430128,
+        "energy": 14500.0,
         "accepted_spot": [
           "Spot Bulk Carrier (220m)",
           "Spot Tanker (280m)"
         ]
       },
       {
-        "bitstring": "100000000000000000",
-        "prob": 0.003960688342654199,
-        "energy": 39500.0,
+        "bitstring": "110000000000001100",
+        "prob": 0.0027678767434301263,
+        "energy": 14500.0,
         "accepted_spot": [
+          "Spot Bulk Carrier (220m)",
           "Spot Tanker (280m)"
         ]
       },
       {
-        "bitstring": "010000000000000000",
-        "prob": 0.003840609640028321,
-        "energy": 40000.0,
+        "bitstring": "110000000011000000",
+        "prob": 0.0027678767434301263,
+        "energy": 14500.0,
         "accepted_spot": [
-          "Spot Bulk Carrier (220m)"
+          "Spot Bulk Carrier (220m)",
+          "Spot Tanker (280m)"
         ]
       }
     ]
@@ -86,36 +81,39 @@
     "p_layers": 1,
     "circuit_depth": 24,
     "rzz_gates": 56,
-    "approx_ratio": 0.9317744335481251,
-    "expected_energy": 94047.98089196844,
+    "approx_ratio": 0.8394376024279017,
+    "expected_energy": 135489.3207739161,
     "ground_truth_energy": 1500.0,
     "opt_params": [
-      3.9400298168367898,
-      0.512625369572781
+      3.7695671804387016,
+      2.433483805544401
     ],
     "top_samples": [
       {
-        "bitstring": "010100010001000100",
-        "prob": 0.0007479921398209294,
-        "energy": 207000.0,
+        "bitstring": "110000000000000000",
+        "prob": 0.0015716448338631375,
+        "energy": 145500.0,
         "accepted_spot": [
-          "Spot Bulk Carrier (220m)"
-        ]
-      },
-      {
-        "bitstring": "101000100010001000",
-        "prob": 0.0007253658085390733,
-        "energy": 206500.0,
-        "accepted_spot": [
+          "Spot Bulk Carrier (220m)",
           "Spot Tanker (280m)"
         ]
       },
       {
-        "bitstring": "010000000000000000",
-        "prob": 0.0005110234527088833,
-        "energy": 205000.0,
+        "bitstring": "110110011001100110",
+        "prob": 0.0011565338815848392,
+        "energy": 293500.0,
         "accepted_spot": [
-          "Spot Bulk Carrier (220m)"
+          "Spot Bulk Carrier (220m)",
+          "Spot Tanker (280m)"
+        ]
+      },
+      {
+        "bitstring": "111010101010101010",
+        "prob": 0.0011527715722112295,
+        "energy": 293500.0,
+        "accepted_spot": [
+          "Spot Bulk Carrier (220m)",
+          "Spot Tanker (280m)"
         ]
       }
     ]
@@ -125,29 +123,29 @@
     "p_layers": 2,
     "circuit_depth": 47,
     "rzz_gates": 112,
-    "approx_ratio": 0.9443447660597953,
-    "expected_energy": 76996.3248398876,
+    "approx_ratio": 0.8340493042544109,
+    "expected_energy": 139985.8555996941,
     "ground_truth_energy": 1500.0,
     "opt_params": [
-      2.1216338853941106,
-      1.5342541182118137,
-      0.2652800365971224,
-      0.6502811102678611
+      1.8833980226904006,
+      0.5355166722027973,
+      0.40126954908941403,
+      0.9813299487989641
     ],
     "top_samples": [
       {
         "bitstring": "110000000000000000",
-        "prob": 0.005657317583580621,
-        "energy": 259500.0,
+        "prob": 0.0011727323947339529,
+        "energy": 145500.0,
         "accepted_spot": [
           "Spot Bulk Carrier (220m)",
           "Spot Tanker (280m)"
         ]
       },
       {
-        "bitstring": "110001000100010001",
-        "prob": 0.00221486095785041,
-        "energy": 261500.0,
+        "bitstring": "111111000000000000",
+        "prob": 0.0008355195862536594,
+        "energy": 99500.0,
         "accepted_spot": [
           "Spot Bulk Carrier (220m)",
           "Spot Tanker (280m)"
@@ -155,8 +153,8 @@
       },
       {
         "bitstring": "110000000000001111",
-        "prob": 0.0017028890340510534,
-        "energy": 171500.0,
+        "prob": 0.0008355195862536591,
+        "energy": 99500.0,
         "accepted_spot": [
           "Spot Bulk Carrier (220m)",
           "Spot Tanker (280m)"
