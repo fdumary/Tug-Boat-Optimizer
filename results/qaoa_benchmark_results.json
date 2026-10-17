@@ -1,32 +1,36 @@
 [
   {
     "scenario": "Calm Wind (10 kts)",
+    "tuning": "baseline: expectation, 1 start",
     "p_layers": 1,
     "circuit_depth": 24,
     "rzz_gates": 56,
-    "approx_ratio": 0.7922469215076318,
-    "expected_energy": 196467.79462895222,
+    "approx_ratio": 0.7922469215392927,
+    "expected_energy": 196467.79459763956,
     "ground_truth_energy": -9000.0,
+    "p_optimal_per_shot": 2.0186594876558105e-06,
+    "p_optimum_found_in_4000_shots": 0.00804213371339979,
+    "tuning_seconds": 2.0780956745147705,
     "opt_params": [
-      2.1597794822366585,
-      0.31733003022227824
+      2.1597789266189475,
+      0.31733684978669074
     ],
     "top_samples": [
       {
-        "bitstring": "000011101001100011",
-        "prob": 8.738124100065954e-05,
+        "bitstring": "000110001100111010",
+        "prob": 8.738004757489221e-05,
         "energy": 280000.0,
         "accepted_spot": []
       },
       {
-        "bitstring": "000011001101101010",
-        "prob": 8.738124100065952e-05,
+        "bitstring": "000011011000111010",
+        "prob": 8.738004757489217e-05,
         "energy": 280000.0,
         "accepted_spot": []
       },
       {
-        "bitstring": "000011001110100110",
-        "prob": 8.738124100065952e-05,
+        "bitstring": "000011101000110110",
+        "prob": 8.738004757489217e-05,
         "energy": 280000.0,
         "accepted_spot": []
       }
@@ -34,22 +38,26 @@
   },
   {
     "scenario": "Calm Wind (10 kts)",
+    "tuning": "baseline: expectation, 1 start",
     "p_layers": 2,
     "circuit_depth": 47,
     "rzz_gates": 112,
-    "approx_ratio": 0.933214518211454,
-    "expected_energy": 57050.84148887211,
+    "approx_ratio": 0.9320570133660107,
+    "expected_energy": 58195.61378101547,
     "ground_truth_energy": -9000.0,
+    "p_optimal_per_shot": 0.029400354431069323,
+    "p_optimum_found_in_4000_shots": 1.0,
+    "tuning_seconds": 4.998501777648926,
     "opt_params": [
-      1.243586510797574,
-      0.8657446099992356,
-      0.8379706320874328,
-      1.1574665054702447
+      1.2678519042281708,
+      0.8785622993372253,
+      0.8422801595355215,
+      1.1389934403723443
     ],
     "top_samples": [
       {
         "bitstring": "111100000000000000",
-        "prob": 0.002767876743430128,
+        "prob": 0.002508850013396248,
         "energy": 14500.0,
         "accepted_spot": [
           "Spot Bulk Carrier (220m)",
@@ -58,7 +66,7 @@
       },
       {
         "bitstring": "110000000000001100",
-        "prob": 0.0027678767434301263,
+        "prob": 0.002508850013396247,
         "energy": 14500.0,
         "accepted_spot": [
           "Spot Bulk Carrier (220m)",
@@ -67,7 +75,7 @@
       },
       {
         "bitstring": "110000000011000000",
-        "prob": 0.0027678767434301263,
+        "prob": 0.002508850013396247,
         "energy": 14500.0,
         "accepted_spot": [
           "Spot Bulk Carrier (220m)",
@@ -77,40 +85,92 @@
     ]
   },
   {
-    "scenario": "High Wind (22 kts)",
+    "scenario": "Calm Wind (10 kts)",
+    "tuning": "CVaR(0.1), 8 starts",
     "p_layers": 1,
     "circuit_depth": 24,
     "rzz_gates": 56,
-    "approx_ratio": 0.8394376024279017,
-    "expected_energy": 135489.3207739161,
-    "ground_truth_energy": 1500.0,
+    "approx_ratio": 0.9584976619007256,
+    "expected_energy": 32045.812380182328,
+    "ground_truth_energy": -9000.0,
+    "p_optimal_per_shot": 0.03458339096031622,
+    "p_optimum_found_in_4000_shots": 1.0,
+    "tuning_seconds": 22.270225763320923,
     "opt_params": [
-      3.7695671804387016,
-      2.433483805544401
+      0.7749594693514886,
+      2.6446392648314494
     ],
     "top_samples": [
       {
         "bitstring": "110000000000000000",
-        "prob": 0.0015716448338631375,
-        "energy": 145500.0,
+        "prob": 0.014490695961747757,
+        "energy": 25500.0,
         "accepted_spot": [
           "Spot Bulk Carrier (220m)",
           "Spot Tanker (280m)"
         ]
       },
       {
-        "bitstring": "110110011001100110",
-        "prob": 0.0011565338815848392,
-        "energy": 293500.0,
+        "bitstring": "110000000000010000",
+        "prob": 0.007543655523581046,
+        "energy": 14000.0,
         "accepted_spot": [
           "Spot Bulk Carrier (220m)",
           "Spot Tanker (280m)"
         ]
       },
       {
-        "bitstring": "111010101010101010",
-        "prob": 0.0011527715722112295,
-        "energy": 293500.0,
+        "bitstring": "110001000000000000",
+        "prob": 0.007543655523581046,
+        "energy": 14000.0,
+        "accepted_spot": [
+          "Spot Bulk Carrier (220m)",
+          "Spot Tanker (280m)"
+        ]
+      }
+    ]
+  },
+  {
+    "scenario": "Calm Wind (10 kts)",
+    "tuning": "CVaR(0.1), 8 starts",
+    "p_layers": 2,
+    "circuit_depth": 47,
+    "rzz_gates": 112,
+    "approx_ratio": 0.9330374601280483,
+    "expected_energy": 57225.95193336021,
+    "ground_truth_energy": -9000.0,
+    "p_optimal_per_shot": 0.06353807773366593,
+    "p_optimum_found_in_4000_shots": 1.0,
+    "tuning_seconds": 80.25212335586548,
+    "opt_params": [
+      1.2929330574346312,
+      1.0847340671811818,
+      2.364389501822016,
+      0.5015983121357422
+    ],
+    "top_samples": [
+      {
+        "bitstring": "110000000000001101",
+        "prob": 0.00455154536678203,
+        "energy": 27000.0,
+        "accepted_spot": [
+          "Spot Bulk Carrier (220m)",
+          "Spot Tanker (280m)"
+        ]
+      },
+      {
+        "bitstring": "110000000011010000",
+        "prob": 0.00455154536678203,
+        "energy": 27000.0,
+        "accepted_spot": [
+          "Spot Bulk Carrier (220m)",
+          "Spot Tanker (280m)"
+        ]
+      },
+      {
+        "bitstring": "110000110100000000",
+        "prob": 0.00455154536678203,
+        "energy": 27000.0,
         "accepted_spot": [
           "Spot Bulk Carrier (220m)",
           "Spot Tanker (280m)"
@@ -120,22 +180,24 @@
   },
   {
     "scenario": "High Wind (22 kts)",
-    "p_layers": 2,
-    "circuit_depth": 47,
-    "rzz_gates": 112,
-    "approx_ratio": 0.8340493042544109,
-    "expected_energy": 139985.8555996941,
+    "tuning": "baseline: expectation, 1 start",
+    "p_layers": 1,
+    "circuit_depth": 24,
+    "rzz_gates": 56,
+    "approx_ratio": 0.8394368621974326,
+    "expected_energy": 135489.93849624257,
     "ground_truth_energy": 1500.0,
+    "p_optimal_per_shot": 8.014178145498178e-06,
+    "p_optimum_found_in_4000_shots": 0.03154846727429983,
+    "tuning_seconds": 2.294234275817871,
     "opt_params": [
-      1.8833980226904006,
-      0.5355166722027973,
-      0.40126954908941403,
-      0.9813299487989641
+      3.7688831254269406,
+      2.4370144189154956
     ],
     "top_samples": [
       {
         "bitstring": "110000000000000000",
-        "prob": 0.0011727323947339529,
+        "prob": 0.001588023995679829,
         "energy": 145500.0,
         "accepted_spot": [
           "Spot Bulk Carrier (220m)",
@@ -143,9 +205,48 @@
         ]
       },
       {
-        "bitstring": "111111000000000000",
-        "prob": 0.0008355195862536594,
-        "energy": 99500.0,
+        "bitstring": "110100010001000100",
+        "prob": 0.0011646715426288537,
+        "energy": 147500.0,
+        "accepted_spot": [
+          "Spot Bulk Carrier (220m)",
+          "Spot Tanker (280m)"
+        ]
+      },
+      {
+        "bitstring": "111000100010001000",
+        "prob": 0.0011532599180109075,
+        "energy": 147500.0,
+        "accepted_spot": [
+          "Spot Bulk Carrier (220m)",
+          "Spot Tanker (280m)"
+        ]
+      }
+    ]
+  },
+  {
+    "scenario": "High Wind (22 kts)",
+    "tuning": "baseline: expectation, 1 start",
+    "p_layers": 2,
+    "circuit_depth": 47,
+    "rzz_gates": 112,
+    "approx_ratio": 0.8344333000697775,
+    "expected_energy": 139665.4110917707,
+    "ground_truth_energy": 1500.0,
+    "p_optimal_per_shot": 3.129599807914327e-05,
+    "p_optimum_found_in_4000_shots": 0.11766718354917305,
+    "tuning_seconds": 4.298351287841797,
+    "opt_params": [
+      1.8600581420979694,
+      0.562864107470944,
+      0.3781199232571444,
+      1.0209624140006615
+    ],
+    "top_samples": [
+      {
+        "bitstring": "110000000000000000",
+        "prob": 0.0017218960274848953,
+        "energy": 145500.0,
         "accepted_spot": [
           "Spot Bulk Carrier (220m)",
           "Spot Tanker (280m)"
@@ -153,12 +254,97 @@
       },
       {
         "bitstring": "110000000000001111",
-        "prob": 0.0008355195862536591,
+        "prob": 0.0009222293455172022,
         "energy": 99500.0,
         "accepted_spot": [
           "Spot Bulk Carrier (220m)",
           "Spot Tanker (280m)"
         ]
+      },
+      {
+        "bitstring": "110000000011110000",
+        "prob": 0.0009222293455172022,
+        "energy": 99500.0,
+        "accepted_spot": [
+          "Spot Bulk Carrier (220m)",
+          "Spot Tanker (280m)"
+        ]
+      }
+    ]
+  },
+  {
+    "scenario": "High Wind (22 kts)",
+    "tuning": "CVaR(0.1), 8 starts",
+    "p_layers": 1,
+    "circuit_depth": 24,
+    "rzz_gates": 56,
+    "approx_ratio": 0.9170273091890548,
+    "expected_energy": 70740.71048173383,
+    "ground_truth_energy": 1500.0,
+    "p_optimal_per_shot": 0.0052348728870771355,
+    "p_optimum_found_in_4000_shots": 0.9999999992375554,
+    "tuning_seconds": 19.044451475143433,
+    "opt_params": [
+      0.7109486490185307,
+      2.7512618482275513
+    ],
+    "top_samples": [
+      {
+        "bitstring": "000000000100100001",
+        "prob": 0.00043623940725642823,
+        "energy": 1500.0,
+        "accepted_spot": []
+      },
+      {
+        "bitstring": "000001000000100001",
+        "prob": 0.00043623940725642823,
+        "energy": 1500.0,
+        "accepted_spot": []
+      },
+      {
+        "bitstring": "000010000000010001",
+        "prob": 0.00043623940725642823,
+        "energy": 1500.0,
+        "accepted_spot": []
+      }
+    ]
+  },
+  {
+    "scenario": "High Wind (22 kts)",
+    "tuning": "CVaR(0.1), 8 starts",
+    "p_layers": 2,
+    "circuit_depth": 47,
+    "rzz_gates": 112,
+    "approx_ratio": 0.9487892679342462,
+    "expected_energy": 44235.35590887148,
+    "ground_truth_energy": 1500.0,
+    "p_optimal_per_shot": 0.013143400864541244,
+    "p_optimum_found_in_4000_shots": 1.0,
+    "tuning_seconds": 77.514981508255,
+    "opt_params": [
+      0.46027220710092676,
+      1.2664302500882063,
+      2.7184170371473853,
+      -0.19399435693514905
+    ],
+    "top_samples": [
+      {
+        "bitstring": "000000000000010001",
+        "prob": 0.0013148885155313042,
+        "energy": 13000.0,
+        "accepted_spot": []
+      },
+      {
+        "bitstring": "000000000100000001",
+        "prob": 0.0013148885155313042,
+        "energy": 13000.0,
+        "accepted_spot": []
+      },
+      {
+        "bitstring": "000000000100010000",
+        "prob": 0.0013148885155313031,
+        "energy": 13000.0,
+        "accepted_spot": []
       }
     ]
   }
