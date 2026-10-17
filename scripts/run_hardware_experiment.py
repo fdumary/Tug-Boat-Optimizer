@@ -152,7 +152,7 @@ def main():
 
     # 2. Simulator reference on the same circuit
     probs = np.abs(sim.statevector_array(params)) ** 2
-    sim_counts = sim.sample_counts(params, shots=args.shots, seed=7)
+    sim_counts = {k: int(v) for k, v in sim.sample_counts(params, shots=args.shots, seed=7).items()}
     sim_m = score_counts(optimizer, sim_counts, optimum)
     sim_m["exact_p_optimal_per_shot"] = float(probs[sim.diag_E <= sim.diag_E.min() + 1e-9].sum())
 
@@ -191,7 +191,7 @@ def main():
     print(f"Submitted job {job_id}, waiting...")
     result = job.result()
     wall_s = time.time() - t0
-    hw_counts = result[0].data.meas.get_counts()
+    hw_counts = {k: int(v) for k, v in result[0].data.meas.get_counts().items()}
 
     usage_s = None
     if not args.fake:
@@ -229,8 +229,8 @@ def main():
         "metrics_hardware": strip(hw_m),
     }
     with open(os.path.join(out_dir, "run.json"), "w") as f:
-        json.dump(run, f, indent=2)
-    hw_label = f"{'Fake ' if args.fake else ''}{backend.name} (hardware)"
+        json.dump(run, f, indent=2, default=float)
+    hw_label = f"{backend.name} (simulated noisy chip)" if args.fake else f"{backend.name} (hardware)"
     make_plots(out_dir, sim_m, hw_m, optimum,
                f"{args.tugs} tugs, {args.wind:g} kn, {n} qubits, p={args.p}: simulator vs {backend.name}", hw_label)
 
