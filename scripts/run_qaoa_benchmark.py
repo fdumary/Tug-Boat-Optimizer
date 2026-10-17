@@ -88,10 +88,11 @@ def run_benchmark():
             elapsed = time.time() - start_t
 
             # Un-normalize expected energy
-            raw_exp_energy = (opt_exp_energy - sim.offset) * sim.norm_factor + bqm.offset
+            # expectation_value already includes the (normalized) Ising offset
+            raw_exp_energy = opt_exp_energy * sim.norm_factor
 
             # Sampling top 10 states
-            samples = sim.sample_probabilities(opt_params, top_k=10)
+            samples = sim.sample_probabilities(opt_params, top_k=10, apply_qec=False)
 
             # Check ground state overlap
             ground_truth_prob = 0.0
