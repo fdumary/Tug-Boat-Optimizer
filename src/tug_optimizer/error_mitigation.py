@@ -113,7 +113,7 @@ class ConstraintErrorCorrection:
 
         # Check Spot consistency
         for s in self.ships:
-            tugs_allocated = sum(sample.get(f"x_{t.id}_{s.id}", 0) for s in self.tugs)
+            tugs_allocated = sum(sample.get(f"x_{t.id}_{s.id}", 0) for t in self.tugs)
             if s.is_contract:
                 if tugs_allocated != self.demands[s.id]:
                     syndromes["unmet_contract_error"] = True
@@ -199,6 +199,14 @@ class ConstraintErrorCorrection:
                 allocated = sum(corrected.get(f"x_{t.id}_{s.id}", 0) for t in self.tugs)
                 d_s = self.demands[s.id]
                 deficit = d_s - allocated
+                # Release surplus tugs on over-served contract ships
+                for t in self.tugs:
+                    k = f"x_{t.id}_{s.id}"
+                    if deficit < 0 and corrected.get(k, 0) == 1:
+                        corrected[k] = 0
+                        edits += 1
+                        deficit += 1
+                        free_tugs.append(t)
                 while deficit > 0 and free_tugs:
                     t_assign = free_tugs.pop(0)
                     corrected[f"x_{t_assign.id}_{s.id}"] = 1
@@ -260,4 +268,6 @@ def apply_quantum_error_correction(
             }
             results.append((bitstring, prob, raw_energy, decoded, syndrome_info))
 
+    # Repairs change energies, so re-rank: lowest energy first
+    results.sort(key=lambda r: (r[2], -r[1]))
     return results
