@@ -83,19 +83,25 @@ class TugOptimizationQUBO:
         tugs: List[Tug],
         ships: List[Ship],
         wind_speed_knots: float = 12.0,
-        lambda_unique: float = 20000.0,    # Penalty for double-booking a tug
-        lambda_contract: float = 30000.0,  # Penalty for unserved contracted demand
-        lambda_spot: float = 15000.0,      # Penalty for accepting spot ship without required tugs
-        lambda_crew: float = 40000.0,      # Penalty for assigning unavailable crew/tug
+        lambda_unique: Optional[float] = None,    # Penalty for double-booking a tug
+        lambda_contract: Optional[float] = None,  # Penalty for unserved contracted demand
+        lambda_spot: Optional[float] = None,      # Penalty for accepting spot ship without required tugs
+        lambda_crew: Optional[float] = None,      # Penalty for assigning unavailable crew/tug
         prefilter_resting_tugs: bool = True # Improvement 1: Pre-filter unavailable tugs to save qubits
     ):
         self.tugs = tugs
         self.ships = ships
         self.wind_speed_knots = wind_speed_knots
-        self.lambda_unique = lambda_unique
-        self.lambda_contract = lambda_contract
-        self.lambda_spot = lambda_spot
-        self.lambda_crew = lambda_crew
+
+        # Penalties left as None scale with the instance: 2x the most any single
+        # rule-break could gain (largest spot revenue + largest tug cost). Large fixed
+        # penalties shrink the cost signal QAOA sees after Hamiltonian normalisation.
+        max_gain = max([s.spot_revenue for s in ships] + [0.0]) + max([t.activation_cost for t in tugs] + [0.0])
+        default_lambda = 2.0 * max(max_gain, 1.0)
+        self.lambda_unique = default_lambda if lambda_unique is None else lambda_unique
+        self.lambda_contract = default_lambda if lambda_contract is None else lambda_contract
+        self.lambda_spot = default_lambda if lambda_spot is None else lambda_spot
+        self.lambda_crew = default_lambda if lambda_crew is None else lambda_crew
         self.prefilter_resting_tugs = prefilter_resting_tugs
 
         # Improvement 1: Active tugs list
