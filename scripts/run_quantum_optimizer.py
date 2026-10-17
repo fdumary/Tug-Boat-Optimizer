@@ -47,7 +47,9 @@ def solve_tug_scheduling_quantum(
     ibm_token: str = None,
     backend_name: str = None,
     shots: int = 4000,
-    enable_qec: bool = True
+    enable_qec: bool = True,
+    cvar_alpha: float = 0.1,
+    n_starts: int = 8
 ):
     """
     Solves the tugboat allocation problem on a quantum computer/simulator for arbitrary T with QEC.
@@ -88,7 +90,7 @@ def solve_tug_scheduling_quantum(
 
     # 5. Build QAOA Simulator / Circuit
     print(f"\n[3] Synthesizing QAOA Quantum Circuit (Depth p={p_layers})...")
-    sim = QAOASimulator(optimizer, p_layers=p_layers, normalize=True)
+    sim = QAOASimulator(optimizer, p_layers=p_layers, normalize=True, cvar_alpha=cvar_alpha)
     print(f"    - Virtual Circuit Depth: {sim.qc.depth()}")
     print(f"    - Gate Operations: {dict(sim.qc.count_ops())}")
 
@@ -108,7 +110,7 @@ def solve_tug_scheduling_quantum(
 
         # Fast pre-tuning of variational angles
         print(f"    - Pre-calibrating variational angles (gamma, beta)...")
-        opt_params, _ = sim.optimize_parameters(max_iter=25)
+        opt_params, _ = sim.optimize_parameters(max_iter=100, n_starts=n_starts)
         bound_qc = sim.bind_parameters(opt_params)
         # Sampler needs classical bits to return counts
         bound_qc.measure_all()
@@ -137,7 +139,7 @@ def solve_tug_scheduling_quantum(
         # EXECUTION PATH B: LOCAL QUANTUM SIMULATOR (No Token Required)
         # -------------------------------------------------------------
         print(f"\n[4] Executing on Local Quantum Statevector Simulator...")
-        opt_params, _ = sim.optimize_parameters(max_iter=35)
+        opt_params, _ = sim.optimize_parameters(max_iter=100, n_starts=n_starts)
         print(f"    - Optimal Variational Parameters: Gamma={opt_params[:p_layers]}, Beta={opt_params[p_layers:]}")
         # Draw shots from the statevector, like hardware, and keep the lowest-energy ones
         counts = sim.sample_counts(opt_params, shots=shots)
@@ -180,6 +182,9 @@ if __name__ == "__main__":
     parser.add_argument("--ibm-token", type=str, default=None, help="IBM Quantum API token (optional)")
     parser.add_argument("--backend", type=str, default=None, help="IBM backend name (optional)")
     parser.add_argument("--p", type=int, default=1, help="QAOA layers p (default: 1)")
+    parser.add_argument("--cvar-alpha", type=float, default=0.1,
+                        help="Tune angles on the best alpha fraction of outcomes (CVaR); 1.0 = plain expectation (default: 0.1)")
+    parser.add_argument("--starts", type=int, default=8, help="Random starting angles for COBYLA (default: 8)")
     parser.add_argument("--shots", type=int, default=4000, help="Number of shots (default: 4000)")
     parser.add_argument("--qec", action="store_true", default=True, help="Enable Quantum Error Correction (default: True)")
     parser.add_argument("--no-qec", dest="qec", action="store_false", help="Disable Quantum Error Correction")
@@ -189,6 +194,8 @@ if __name__ == "__main__":
         T=args.tugs,
         wind_speed_knots=args.wind,
         p_layers=args.p,
+        cvar_alpha=args.cvar_alpha,
+        n_starts=args.starts,
         ibm_token=args.ibm_token,
         backend_name=args.backend,
         shots=args.shots,
