@@ -95,6 +95,26 @@ def qubo_to_ising_pauli(
     return cost_op, offset, norm_factor
 
 
+def rank_samples_by_energy(
+    optimizer: TugOptimizationQUBO,
+    counts: Dict[str, int]
+) -> List[Tuple[str, float, float, Dict]]:
+    """
+    Scores every measured bitstring by its QUBO energy and returns them lowest-energy first.
+    The answer is the best schedule seen in any shot, not the most frequent bitstring.
+    Bitstrings are Qiskit order: variable i is character (n - 1 - i).
+    """
+    bqm = optimizer.build_bqm()
+    n = optimizer.num_variables
+    total = sum(counts.values())
+    ranked = []
+    for bitstring, c in counts.items():
+        sample = {var: int(bitstring[n - 1 - i]) for i, var in enumerate(optimizer.var_names)}
+        ranked.append((bitstring, c / total, bqm.energy(sample), optimizer.decode_solution(sample)))
+    ranked.sort(key=lambda r: (r[2], -r[1]))
+    return ranked
+
+
 def build_qaoa_circuit(
     optimizer: TugOptimizationQUBO,
     p_layers: int = 1,
@@ -235,21 +255,29 @@ class QAOASimulator:
         else:
             self.use_vectorized = False
 
+    def bind_parameters(self, params: np.ndarray) -> QuantumCircuit:
+        """
+        Binds params = [gamma_1..gamma_p, beta_1..beta_p] into the ansatz.
+        """
+        param_dict = {}
+        for k in range(self.p_layers):
+            param_dict[self.gammas[k]] = params[k]
+            param_dict[self.betas[k]] = params[self.p_layers + k]
+        return self.qc.assign_parameters(param_dict)
+
+    def sample_counts(self, params: np.ndarray, shots: int = 4000, seed: int = 42) -> Dict[str, int]:
+        """
+        Draws measurement shots from the simulated statevector, mirroring what a QPU returns.
+        """
+        sv = Statevector.from_instruction(self.bind_parameters(params))
+        sv.seed(seed)
+        return dict(sv.sample_counts(shots))
+
     def expectation_value(self, params: np.ndarray) -> float:
         """
         Fast expectation value computation.
         """
-        half = self.p_layers
-        gamma_vals = params[:half]
-        beta_vals = params[half:]
-
-        param_dict = {}
-        for k in range(self.p_layers):
-            param_dict[self.gammas[k]] = gamma_vals[k]
-            param_dict[self.betas[k]] = beta_vals[k]
-
-        bound_qc = self.qc.assign_parameters(param_dict)
-        sv = Statevector.from_instruction(bound_qc)
+        sv = Statevector.from_instruction(self.bind_parameters(params))
         exp_val = sv.expectation_value(self.cost_op).real + self.offset
         return exp_val
 
@@ -278,17 +306,7 @@ class QAOASimulator:
         Extracts measurement probabilities and applies Quantum Error Correction (QEC) subspace recovery.
         Uses heapq.nlargest to avoid sorting all 2^N elements.
         """
-        half = self.p_layers
-        gamma_vals = opt_params[:half]
-        beta_vals = opt_params[half:]
-
-        param_dict = {}
-        for k in range(self.p_layers):
-            param_dict[self.gammas[k]] = gamma_vals[k]
-            param_dict[self.betas[k]] = beta_vals[k]
-
-        bound_qc = self.qc.assign_parameters(param_dict)
-        sv = Statevector.from_instruction(bound_qc)
+        sv = Statevector.from_instruction(self.bind_parameters(opt_params))
         probs = sv.probabilities_dict()
 
         # Improvement 4: Use heapq.nlargest (O(2^N log k) instead of full O(2^N log 2^N) sort)
