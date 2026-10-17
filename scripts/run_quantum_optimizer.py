@@ -8,11 +8,11 @@ Runs the complete quantum optimization pipeline for any user-defined fleet size 
   4. QAOA Quantum Circuit: Constructs parameterized phase separator and mixer.
   5. Quantum Execution:
      - Local Simulation: Runs on Qiskit quantum statevector with fast COBYLA variational optimization.
-     - IBM Quantum Hardware: Submits to real IBM QPUs via Qiskit Runtime V2 with Resilience Level 1 (TREX).
+     - IBM Quantum Hardware: Submits to real IBM QPUs via Qiskit Runtime V2 SamplerV2 with dynamical decoupling and twirling.
   6. Quantum Error Correction (QEC) & Mitigation:
      - Syndrome detection for double-booking, phantom spot allocations, and contract deficits.
      - Minimum-distance projection / error recovery repairing corrupted bitstrings.
-  7. Solution Decoder: Decodes quantum measurement bitstrings into validated tug schedules.
+  7. Solution Decoder: Scores every measured bitstring by QUBO energy and decodes the best into tug schedules.
 
 Usage:
   python scripts/run_quantum_optimizer.py --tugs 4 --wind 12.0 --qec
@@ -36,8 +36,7 @@ from tug_optimizer import (
     build_qaoa_circuit,
     qubo_to_ising_pauli,
     apply_quantum_error_correction,
-    ConstraintErrorCorrection,
-    ReadoutErrorMitigator
+    rank_samples_by_energy,
 )
 
 
@@ -101,7 +100,7 @@ def solve_tug_scheduling_quantum(
         from qiskit_ibm_runtime import QiskitRuntimeService, SamplerV2 as Sampler
         from qiskit.transpiler.preset_passmanagers import generate_preset_pass_manager
 
-        service = QiskitRuntimeService(channel="ibm_quantum", token=ibm_token)
+        service = QiskitRuntimeService(channel="ibm_quantum_platform", token=ibm_token)
         backend = service.backend(backend_name) if backend_name else service.least_busy(
             operational=True, simulator=False, min_num_qubits=num_qubits
         )
@@ -110,46 +109,45 @@ def solve_tug_scheduling_quantum(
         # Fast pre-tuning of variational angles
         print(f"    - Pre-calibrating variational angles (gamma, beta)...")
         opt_params, _ = sim.optimize_parameters(max_iter=25)
-        param_dict = {sim.gammas[0]: opt_params[0], sim.betas[0]: opt_params[1]}
-        bound_qc = sim.qc.assign_parameters(param_dict)
+        bound_qc = sim.bind_parameters(opt_params)
+        # Sampler needs classical bits to return counts
+        bound_qc.measure_all()
 
         # Transpile virtual circuit to physical heavy-hex topology
-        print(f"    - Transpiling to physical topology (Optimization Level 3 with Dynamical Decoupling)...")
+        print(f"    - Transpiling to physical topology (Optimization Level 3)...")
         pm = generate_preset_pass_manager(backend=backend, optimization_level=3)
         transpiled_qc = pm.run(bound_qc)
         print(f"    - Physical Transpiled Circuit Depth: {transpiled_qc.depth()}")
 
-        # Submit job using Sampler V2 with Hardware Error Mitigation (Resilience Level 1: TREX)
-        print(f"    - Submitting {shots} shots to {backend.name} (Resilience Level 1: Readout Error Mitigation)...")
-        sampler = Sampler(backend)
-        # Configure resilience
-        sampler.options.resilience_level = 1
+        # SamplerV2 has no resilience_level (that is EstimatorV2); use dynamical decoupling and twirling instead
+        print(f"    - Submitting {shots} shots to {backend.name} (Dynamical Decoupling + Pauli Twirling)...")
+        sampler = Sampler(mode=backend)
+        sampler.options.dynamical_decoupling.enable = True
+        sampler.options.twirling.enable_gates = True
+        sampler.options.twirling.enable_measure = True
         job = sampler.run([transpiled_qc], shots=shots)
         print(f"    - Job Submitted! Job ID: {job.job_id()}")
         print(f"    - Waiting for QPU results...")
         result = job.result()
 
         counts = result[0].data.meas.get_counts()
-        sorted_samples = sorted([(b, c / shots) for b, c in counts.items()], key=lambda x: x[1], reverse=True)
-        bqm = optimizer.build_bqm()
-        raw_samples = []
-        for bitstring, prob in sorted_samples[:10]:
-            sample = {optimizer.var_names[i]: int(bitstring[num_qubits - 1 - i]) for i in range(num_qubits)}
-            raw_samples.append((bitstring, prob, bqm.energy(sample), optimizer.decode_solution(sample)))
+        raw_samples = rank_samples_by_energy(optimizer, counts)
     else:
         # -------------------------------------------------------------
         # EXECUTION PATH B: LOCAL QUANTUM SIMULATOR (No Token Required)
         # -------------------------------------------------------------
         print(f"\n[4] Executing on Local Quantum Statevector Simulator...")
         opt_params, _ = sim.optimize_parameters(max_iter=35)
-        print(f"    - Optimal Variational Parameters: Gamma={opt_params[0]:.4f}, Beta={opt_params[1]:.4f}")
-        raw_samples = sim.sample_probabilities(opt_params, top_k=10, apply_qec=False)
+        print(f"    - Optimal Variational Parameters: Gamma={opt_params[:p_layers]}, Beta={opt_params[p_layers:]}")
+        # Draw shots from the statevector, like hardware, and keep the lowest-energy ones
+        counts = sim.sample_counts(opt_params, shots=shots)
+        raw_samples = rank_samples_by_energy(optimizer, counts)
 
     # 6. Quantum Error Correction (QEC) & Mitigation
     print(f"\n[5] Quantum Error Correction & Mitigation (QEC/QEM):")
     if enable_qec:
         corrected_results = apply_quantum_error_correction(optimizer, raw_samples)
-        print(f"    - QEC Status: ACTIVE (Readout Mitigation + Constraint Syndrome Subspace Recovery)")
+        print(f"    - QEC Status: ACTIVE (Constraint Syndrome Check + Repair)")
         samples_to_show = [
             (bstr, prob, energy, decoded, info)
             for bstr, prob, energy, decoded, info in corrected_results[:5]
@@ -181,6 +179,7 @@ if __name__ == "__main__":
     parser.add_argument("--wind", "-w", type=float, default=12.0, help="Wind speed in knots (default: 12.0)")
     parser.add_argument("--ibm-token", type=str, default=None, help="IBM Quantum API token (optional)")
     parser.add_argument("--backend", type=str, default=None, help="IBM backend name (optional)")
+    parser.add_argument("--p", type=int, default=1, help="QAOA layers p (default: 1)")
     parser.add_argument("--shots", type=int, default=4000, help="Number of shots (default: 4000)")
     parser.add_argument("--qec", action="store_true", default=True, help="Enable Quantum Error Correction (default: True)")
     parser.add_argument("--no-qec", dest="qec", action="store_false", help="Disable Quantum Error Correction")
@@ -189,6 +188,7 @@ if __name__ == "__main__":
     solve_tug_scheduling_quantum(
         T=args.tugs,
         wind_speed_knots=args.wind,
+        p_layers=args.p,
         ibm_token=args.ibm_token,
         backend_name=args.backend,
         shots=args.shots,
