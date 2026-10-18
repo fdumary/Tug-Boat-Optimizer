@@ -1,0 +1,15 @@
+# Tug-Boat-Optimizer: Python packages needed to run the code in src/ and scripts/.
+# Install with:  pip install -r requirements.txt
+# Tested 2026-10-18 on Python 3.14.6 and 3.13: test_qubo.py, test_qaoa_sim.py and
+# run_quantum_optimizer.py --tugs 4 --wind 12 all ran. Windows/Python 3.14 wheels exist for all of these.
+# qiskit and qiskit-ibm-runtime are the exact versions used for all 60 IBM hardware runs.
+
+qiskit==2.6.0               # circuits, transpiler, statevector simulation
+qiskit-ibm-runtime==0.50.0  # IBM hardware (SamplerV2, Batch) and fake backends
+dimod==0.12.22              # QUBO model and exact (brute-force) solver
+numpy==2.5.4
+scipy==1.18.1               # QAOA angle optimisation
+matplotlib==3.11.2          # result charts
+
+# Hardware runs also need an IBM Quantum API key and instance CRN set as
+# IBM_QUANTUM_TOKEN and IBM_QUANTUM_CRN. Never put keys in the repository.
