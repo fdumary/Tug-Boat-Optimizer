@@ -6,7 +6,8 @@ and constructs the parameterized QAOA quantum circuit (Ansatz) in Qiskit.
 
 Efficiency Improvements Implemented:
   1. Caching of Ising Hamiltonian and Pauli operators.
-  2. Fast Vectorized Diagonal Simulator for variational optimization (COBYLA runs in < 1 second).
+  2. Fast Vectorized Diagonal Simulator for variational optimization (used for n <= 20 qubits).
+  5. CVaR objective and multi-start COBYLA for angle tuning.
   3. Top-k probability sampling using heapq.nlargest (avoids O(2^N log 2^N) full statevector sort).
   4. Quantum Error Correction & Mitigation integration.
 """
@@ -188,10 +189,22 @@ class QAOASimulator:
     High-Performance QAOA Simulator.
     Supports both accelerated vectorized diagonal state evolution and Qiskit circuit binding.
     """
-    def __init__(self, optimizer: TugOptimizationQUBO, p_layers: int = 1, normalize: bool = True):
+    def __init__(
+        self,
+        optimizer: TugOptimizationQUBO,
+        p_layers: int = 1,
+        normalize: bool = True,
+        cvar_alpha: Optional[float] = None
+    ):
+        """
+        cvar_alpha: if set (e.g. 0.1), angles are tuned to minimise the mean energy of the best
+                    alpha fraction of outcomes (CVaR, Barkoutsos et al. 2020) instead of the
+                    plain expectation value. None keeps the plain expectation.
+        """
         self.optimizer = optimizer
         self.p_layers = p_layers
         self.normalize = normalize
+        self.cvar_alpha = cvar_alpha
         self.n = optimizer.num_variables
 
         (self.qc, self.gammas, self.betas,
@@ -251,6 +264,7 @@ class QAOASimulator:
                         diag_E += J[i, j] * (spins[i] * spins[j])
 
             self.diag_E = diag_E
+            self._energy_order = np.argsort(diag_E, kind="stable")
             self.use_vectorized = True
         else:
             self.use_vectorized = False
@@ -273,28 +287,85 @@ class QAOASimulator:
         sv.seed(seed)
         return dict(sv.sample_counts(shots))
 
+    def statevector_array(self, params: np.ndarray) -> np.ndarray:
+        """
+        Final QAOA state as a numpy array (index k: bit i of k is qubit i, Qiskit order).
+        Uses the diagonal cost energies directly when available (n <= 20), which matches the
+        circuit exactly but avoids rebuilding it; otherwise falls back to Qiskit.
+        """
+        if not self.use_vectorized:
+            return Statevector.from_instruction(self.bind_parameters(params)).data
+
+        n = self.n
+        psi = np.full(1 << n, 1.0 / np.sqrt(1 << n), dtype=np.complex128)
+        for k in range(self.p_layers):
+            gamma, beta = params[k], params[self.p_layers + k]
+            # Cost layer: RZ(2*gamma*h) and RZZ(2*gamma*J) together = exp(-i*gamma*diag_E)
+            psi *= np.exp(-1j * gamma * self.diag_E)
+            # Mixer layer: RX(2*beta) = cos(beta) I - i sin(beta) X on every qubit
+            c, s_ = np.cos(beta), -1j * np.sin(beta)
+            for q in range(n):
+                v = psi.reshape(1 << (n - 1 - q), 2, 1 << q)
+                a, b = v[:, 0, :].copy(), v[:, 1, :].copy()
+                v[:, 0, :] = c * a + s_ * b
+                v[:, 1, :] = s_ * a + c * b
+        return psi
+
     def expectation_value(self, params: np.ndarray) -> float:
         """
-        Fast expectation value computation.
+        Expected (normalized) cost energy <H_C> + offset.
         """
+        if self.use_vectorized:
+            probs = np.abs(self.statevector_array(params)) ** 2
+            return float(probs @ self.diag_E) + self.offset
         sv = Statevector.from_instruction(self.bind_parameters(params))
-        exp_val = sv.expectation_value(self.cost_op).real + self.offset
-        return exp_val
+        return sv.expectation_value(self.cost_op).real + self.offset
 
-    def optimize_parameters(self, max_iter: int = 50, seed: int = 42) -> Tuple[np.ndarray, float]:
+    def cvar_value(self, params: np.ndarray, alpha: float) -> float:
         """
-        Runs COBYLA to optimize the variational parameters (gamma, beta).
+        CVaR_alpha: mean (normalized) energy over the lowest-energy outcomes holding alpha of
+        the probability mass. alpha = 1 equals the expectation value.
         """
-        np.random.seed(seed)
-        init_params = np.random.uniform(0.1, np.pi / 2, 2 * self.p_layers)
+        if not self.use_vectorized:
+            raise ValueError("CVaR objective needs the vectorized path (n <= 20 qubits)")
+        probs = np.abs(self.statevector_array(params)) ** 2
+        p_sorted = probs[self._energy_order]
+        e_sorted = self.diag_E[self._energy_order]
+        cum = np.cumsum(p_sorted)
+        # Weight of each outcome inside the alpha tail (last one partially)
+        w = np.clip(alpha - (cum - p_sorted), 0.0, p_sorted)
+        return float(w @ e_sorted) / alpha + self.offset
 
-        res = minimize(
-            self.expectation_value,
-            init_params,
-            method="COBYLA",
-            options={"maxiter": max_iter, "disp": False}
-        )
-        return res.x, res.fun
+    def objective(self, params: np.ndarray) -> float:
+        # CVaR needs the full energy table, so above 20 qubits fall back to the expectation value
+        if self.cvar_alpha is None or not self.use_vectorized:
+            return self.expectation_value(params)
+        return self.cvar_value(params, self.cvar_alpha)
+
+    def optimize_parameters(self, max_iter: int = 50, seed: int = 42, n_starts: int = 1) -> Tuple[np.ndarray, float]:
+        """
+        Runs COBYLA on self.objective from n_starts random starting angles and keeps the best.
+        Returns (params, objective value).
+        """
+        rng = np.random.default_rng(seed) if n_starts > 1 else None
+        if rng is None:
+            # Single start keeps the original seeding, so old results stay reproducible
+            np.random.seed(seed)
+        best_x, best_f = None, np.inf
+        for _ in range(n_starts):
+            if rng is None:
+                init_params = np.random.uniform(0.1, np.pi / 2, 2 * self.p_layers)
+            else:
+                init_params = rng.uniform(0.1, np.pi / 2, 2 * self.p_layers)
+            res = minimize(
+                self.objective,
+                init_params,
+                method="COBYLA",
+                options={"maxiter": max_iter, "disp": False}
+            )
+            if res.fun < best_f:
+                best_x, best_f = res.x, res.fun
+        return best_x, best_f
 
     def sample_probabilities(
         self,

@@ -3,7 +3,7 @@ Comprehensive QAOA Benchmark Script
 ====================================
 Evaluates QAOA performance on the 18-qubit Tugboat Optimization instance across:
   - Depths: p = 1 and p = 2
-  - Optimizers: COBYLA
+  - Optimizers: COBYLA, baseline (expectation value, 1 start) vs CVaR(0.1) with 8 starts
   - Scenarios: Calm Wind (10 kts) vs High Wind (22 kts)
   - Metrics: Approximation ratio, Ground state overlap, Circuit gate counts, Execution time.
 Generates performance summary plots saved to artifacts.
@@ -29,6 +29,14 @@ from tug_optimizer import (
     qubo_to_ising_pauli,
     build_qaoa_circuit
 )
+
+
+# (label, cvar_alpha, n_starts, max_iter)
+TUNINGS = [
+    ("baseline: expectation, 1 start", None, 1, 45),
+    ("CVaR(0.1), 8 starts", 0.1, 8, 100),
+]
+SHOTS = 4000
 
 
 def run_benchmark():
@@ -82,22 +90,23 @@ def run_benchmark():
         print(f"  Classical Optimal Energy: {ground_truth_energy:.1f}")
         print(f"  Classical Accepted Spot Ships: {optimizer.decode_solution(ground_truth_sample)['accepted_spot_ships']}")
 
-        for p in [1, 2]:
-            print(f"\n  --- Testing QAOA depth p = {p} ---")
+        for tuning, cvar_alpha, n_starts, max_iter in TUNINGS:
+          for p in [1, 2]:
+            print(f"\n  --- QAOA depth p = {p}, tuning = {tuning} ---")
             start_t = time.time()
-            sim = QAOASimulator(optimizer, p_layers=p, normalize=True)
+            sim = QAOASimulator(optimizer, p_layers=p, normalize=True, cvar_alpha=cvar_alpha)
 
             circuit_depth = sim.qc.depth()
             op_counts = dict(sim.qc.count_ops())
             num_rzz = op_counts.get("rzz", 0)
 
             # Optimize
-            opt_params, opt_exp_energy = sim.optimize_parameters(max_iter=45, seed=123)
+            opt_params, _ = sim.optimize_parameters(max_iter=max_iter, seed=123, n_starts=n_starts)
             elapsed = time.time() - start_t
 
             # Un-normalize expected energy
             # expectation_value already includes the (normalized) Ising offset
-            raw_exp_energy = opt_exp_energy * sim.norm_factor
+            raw_exp_energy = sim.expectation_value(opt_params) * sim.norm_factor
 
             # Sampling top 10 states
             samples = sim.sample_probabilities(opt_params, top_k=10, apply_qec=False)
@@ -107,6 +116,7 @@ def run_benchmark():
             # so no single bitstring need appear in the top samples
             probs = Statevector.from_instruction(sim.bind_parameters(opt_params)).probabilities()
             ground_truth_prob = float(probs[all_energies <= ground_truth_energy + 1e-4].sum())
+            p_found = 1.0 - (1.0 - ground_truth_prob) ** SHOTS
 
             approx_ratio = (max_energy - raw_exp_energy) / (max_energy - min_energy) if max_energy != min_energy else 1.0
 
@@ -115,16 +125,21 @@ def run_benchmark():
             print(f"  Expected QUBO Energy: {raw_exp_energy:.1f}")
             print(f"  Approximation Ratio: {approx_ratio:.4f}")
             print(f"  Ground State Overlap (all optimal states): {ground_truth_prob * 100:.3f}%")
+            print(f"  P(optimum in {SHOTS} shots): {p_found * 100:.1f}%")
             print(f"  Optimization Runtime: {elapsed:.2f}s")
 
             results.append({
                 "scenario": sc_name,
+                "tuning": tuning,
                 "p_layers": p,
                 "circuit_depth": circuit_depth,
                 "rzz_gates": num_rzz,
                 "approx_ratio": float(approx_ratio),
                 "expected_energy": float(raw_exp_energy),
                 "ground_truth_energy": float(ground_truth_energy),
+                "p_optimal_per_shot": ground_truth_prob,
+                f"p_optimum_found_in_{SHOTS}_shots": p_found,
+                "tuning_seconds": elapsed,
                 "opt_params": [float(x) for x in opt_params],
                 "top_samples": [
                     {
@@ -145,22 +160,20 @@ def run_benchmark():
         json.dump(results, f, indent=2)
     print(f"\n[OK] Benchmark results saved to: {json_path}")
 
-    # Plot Comparison Chart
-    fig, axes = plt.subplots(1, 2, figsize=(12, 5))
-    scenarios_labels = ["Calm (p=1)", "Calm (p=2)", "Windy (p=1)", "Windy (p=2)"]
-    approx_ratios = [r["approx_ratio"] for r in results]
-    circuit_depths = [r["circuit_depth"] for r in results]
-
-    axes[0].bar(scenarios_labels, approx_ratios, color=['#2b5c8f', '#1f77b4', '#d95f02', '#e7298a'], width=0.55)
-    axes[0].set_title("QAOA Approximation Ratio by Layer & Scenario")
-    axes[0].set_ylabel("Approximation Ratio")
-    axes[0].set_ylim(0.5, 1.05)
-    axes[0].grid(axis='y', linestyle='--', alpha=0.7)
-
-    axes[1].plot(scenarios_labels, circuit_depths, marker='o', linewidth=2, color='#2ca02c')
-    axes[1].set_title("Quantum Circuit Depth Scaling")
-    axes[1].set_ylabel("Circuit Depth (Gate Layers)")
-    axes[1].grid(linestyle='--', alpha=0.7)
+    # Plot Comparison Chart: chance per shot of measuring an optimal schedule
+    fig, ax = plt.subplots(figsize=(9, 5))
+    labels = [f"{sc.split(' (')[0]}, p={p}" for sc, _ in scenarios for p in (1, 2)]
+    x = np.arange(len(labels))
+    width = 0.38
+    for k, (tuning, *_rest) in enumerate(TUNINGS):
+        vals = [100 * r["p_optimal_per_shot"] for r in results if r["tuning"] == tuning]
+        bars = ax.bar(x + (k - 0.5) * width, vals, width, label=tuning)
+        ax.bar_label(bars, fmt="%.2f%%", fontsize=8)
+    ax.set_xticks(x, labels)
+    ax.set_ylabel("Chance per shot of an optimal schedule (%)")
+    ax.set_title("QAOA, 4 tugs / 18 qubits: baseline vs CVaR + multi-start tuning")
+    ax.legend()
+    ax.grid(axis="y", linestyle="--", alpha=0.6)
 
     plt.tight_layout()
     chart_path = os.path.join(out_dir, "qaoa_benchmark_chart.png")
