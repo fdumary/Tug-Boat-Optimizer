@@ -60,6 +60,8 @@ def main():
     ap.add_argument("--budget-seconds", type=float, default=200, help="Stop before total IBM usage would pass this")
     ap.add_argument("--shots", type=int, default=4000)
     ap.add_argument("--max-seconds", type=int, default=180)
+    ap.add_argument("--mode", choices=("batch", "job"), default="batch",
+                    help="batch: all jobs in one Batch (default); job: plain jobs, if the plan does not allow Batch")
     args = ap.parse_args()
 
     ref = json.load(open(os.path.join(args.ref, "run.json")))
@@ -132,8 +134,9 @@ def main():
     t_start = time.time()
     jobs, all_counts = [], []
     remaining = args.runs
-    with Batch(backend=backend) as batch:
-        sampler = make_sampler(batch)
+    from contextlib import nullcontext
+    with (Batch(backend=backend) if args.mode == "batch" else nullcontext()) as batch:
+        sampler = make_sampler(batch if args.mode == "batch" else backend)
         # Pilot job
         k = min(args.pubs_per_job, remaining)
         t0 = time.time()
@@ -164,7 +167,7 @@ def main():
             jobs.append({"job_id": job.job_id(), "pubs": k, "usage_seconds": u, "wall_seconds": time.time() - t0})
             print(f"  {job.job_id()}: {k} runs, {u} s")
         try:
-            batch_usage = batch.usage()
+            batch_usage = batch.usage() if batch else None
         except Exception:
             batch_usage = None
     wall = time.time() - t_start
