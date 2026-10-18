@@ -1,0 +1,354 @@
+{
+  "instance": {
+    "tugs": 4,
+    "wind_knots": 12.0,
+    "qubits": 18,
+    "optimum_energy": -9000.0,
+    "demands": {
+      "Contract Container (250m)": 1,
+      "Contract Feeder (180m)": 0,
+      "Spot Bulk Carrier (220m)": 1,
+      "Spot Tanker (280m)": 1
+    }
+  },
+  "changes_vs_run1": [
+    "machine and transpiler seed chosen by estimated success probability (300 seeds x ibm_fez,ibm_kingston,ibm_marrakesh)",
+    "noise-aware angles used"
+  ],
+  "qaoa": {
+    "p_layers": 1,
+    "params_run1": [
+      0.7747960263332478,
+      2.6446033691031103
+    ],
+    "params": [
+      0.7581469354452136,
+      2.658063585955092
+    ],
+    "params_noise_aware_candidate": [
+      0.7581469354452136,
+      2.658063585955092
+    ],
+    "used_noise_aware": true,
+    "noise_aware_tuning": "grid 48x48 over [0,pi)^2 then Nelder-Mead from best 3; objective P(optimal) after bit-flip channel",
+    "tuning_seconds_local": 154.98085165023804
+  },
+  "seed_sweep": [
+    {
+      "backend": "ibm_fez",
+      "best_seed": 172,
+      "esp": 0.44652775606904577,
+      "two_qubit_gates": 204,
+      "depth": 318,
+      "pending_jobs": 1
+    },
+    {
+      "backend": "ibm_kingston",
+      "best_seed": 172,
+      "esp": 0.54569985455086,
+      "two_qubit_gates": 204,
+      "depth": 317,
+      "pending_jobs": 0
+    },
+    {
+      "backend": "ibm_marrakesh",
+      "best_seed": 272,
+      "esp": 0.3395717349643715,
+      "two_qubit_gates": 225,
+      "depth": 300,
+      "pending_jobs": 3
+    }
+  ],
+  "chosen_backend": "ibm_kingston",
+  "chosen_seed": 172,
+  "circuit_run1_recompiled_now": {
+    "transpiled_depth": 308,
+    "two_qubit_gates": 237,
+    "esp": 0.4084652135563293,
+    "duration_us": 12.34400000000001,
+    "ops": {
+      "sx": 488,
+      "rz": 297,
+      "cz": 237,
+      "measure": 18,
+      "x": 3,
+      "barrier": 3
+    }
+  },
+  "circuit": {
+    "transpiled_depth": 316,
+    "two_qubit_gates": 204,
+    "esp": 0.5456014041412447,
+    "duration_us": 12.988000000000019,
+    "ops": {
+      "sx": 454,
+      "rz": 320,
+      "cz": 204,
+      "measure": 18,
+      "x": 5,
+      "barrier": 3
+    }
+  },
+  "noise_model_qubits": [
+    {
+      "physical": 89,
+      "readout_p01": 0.00146484375,
+      "readout_p10": 0.007080078125,
+      "t1_us": 157.1268487695397,
+      "decay": 0.07933526308274907
+    },
+    {
+      "physical": 104,
+      "readout_p01": 0.006591796875,
+      "readout_p10": 0.021240234375,
+      "t1_us": 136.83310169251868,
+      "decay": 0.09055299671734784
+    },
+    {
+      "physical": 128,
+      "readout_p01": 0.006103515625,
+      "readout_p10": 0.01025390625,
+      "t1_us": 168.42964814312538,
+      "decay": 0.07421413141678779
+    },
+    {
+      "physical": 91,
+      "readout_p01": 0.000244140625,
+      "readout_p10": 0.005126953125,
+      "t1_us": 254.1627621299776,
+      "decay": 0.04981741003253959
+    },
+    {
+      "physical": 88,
+      "readout_p01": 0.0029296875,
+      "readout_p10": 0.007080078125,
+      "t1_us": 252.9750108745736,
+      "decay": 0.050045356677062225
+    },
+    {
+      "physical": 117,
+      "readout_p01": 0.001220703125,
+      "readout_p10": 0.00537109375,
+      "t1_us": 259.08402888110254,
+      "decay": 0.04889465911837321
+    },
+    {
+      "physical": 129,
+      "readout_p01": 0.003662109375,
+      "readout_p10": 0.008056640625,
+      "t1_us": 200.29158244016307,
+      "decay": 0.06278771197415256
+    },
+    {
+      "physical": 98,
+      "readout_p01": 0.001220703125,
+      "readout_p10": 0.00830078125,
+      "t1_us": 106.70715498624301,
+      "decay": 0.11460047854704314
+    },
+    {
+      "physical": 87,
+      "readout_p01": 0.0126953125,
+      "readout_p10": 0.0224609375,
+      "t1_us": 116.20711641793966,
+      "decay": 0.10574647646916913
+    },
+    {
+      "physical": 105,
+      "readout_p01": 0.000732421875,
+      "readout_p10": 0.009765625,
+      "t1_us": 234.55639632372805,
+      "decay": 0.053867456759778
+    },
+    {
+      "physical": 111,
+      "readout_p01": 0.00439453125,
+      "readout_p10": 0.01025390625,
+      "t1_us": 355.1362936216371,
+      "decay": 0.03591120210088028
+    },
+    {
+      "physical": 110,
+      "readout_p01": 0.0009765625,
+      "readout_p10": 0.008056640625,
+      "t1_us": 285.426525551796,
+      "decay": 0.04448405673907008
+    },
+    {
+      "physical": 106,
+      "readout_p01": 0.00244140625,
+      "readout_p10": 0.011962890625,
+      "t1_us": 105.90464593419759,
+      "decay": 0.11541672758859234
+    },
+    {
+      "physical": 97,
+      "readout_p01": 0.003173828125,
+      "readout_p10": 0.010498046875,
+      "t1_us": 197.5481600225654,
+      "decay": 0.06363132196993082
+    },
+    {
+      "physical": 108,
+      "readout_p01": 0.002685546875,
+      "readout_p10": 0.012939453125,
+      "t1_us": 211.94393518054704,
+      "decay": 0.05944048958152148
+    },
+    {
+      "physical": 107,
+      "readout_p01": 0.005859375,
+      "readout_p10": 0.0166015625,
+      "t1_us": 196.36259940535825,
+      "decay": 0.06400293845141258
+    },
+    {
+      "physical": 109,
+      "readout_p01": 0.0009765625,
+      "readout_p10": 0.0068359375,
+      "t1_us": 272.96998618636525,
+      "decay": 0.04646612025382413
+    },
+    {
+      "physical": 118,
+      "readout_p01": 0.000244140625,
+      "readout_p10": 0.0068359375,
+      "t1_us": 151.13584459857873,
+      "decay": 0.08234698050833966
+    }
+  ],
+  "predictions": {
+    "noiseless_p_opt_run1_angles": 0.03458348806199331,
+    "noiseless_p_opt_noise_aware_angles": 0.03437685854022525,
+    "model_hw_p_opt_run1": 0.008193068519122427,
+    "model_hw_p_opt_run2_keep_angles": 0.013456447687297455,
+    "model_hw_p_opt_run2_noise_aware_angles": 0.013612700708612018,
+    "uniform_random_p_opt": 9.1552734375e-05
+  },
+  "hardware": {
+    "backend": "ibm_kingston",
+    "job_id": "dba0ql8c77vs738253fg",
+    "max_execution_time_s": 180,
+    "qpu_usage_seconds": 3,
+    "wall_seconds_incl_queue": 11.808898448944092,
+    "options": "dynamical decoupling + gate and measurement twirling",
+    "run1_job_id": "dba0j7vi0auc7391b3tg"
+  },
+  "metrics_simulator": {
+    "shots": 4000,
+    "distinct_bitstrings": 1944,
+    "share_optimal": 0.0355,
+    "share_valid": 0.07425,
+    "found_optimum": true,
+    "best_energy": -9000.0,
+    "mean_energy": 30304.375,
+    "best_schedule": {
+      "tugs_assigned": {
+        "Tug-01": "Spot Tanker (280m)",
+        "Tug-02": "Spot Bulk Carrier (220m)",
+        "Tug-03": "Contract Container (250m)",
+        "Tug-04": null
+      },
+      "accepted_spot_ships": [
+        "Spot Bulk Carrier (220m)",
+        "Spot Tanker (280m)"
+      ],
+      "total_tugs_used": 3,
+      "demands": {
+        "Contract Container (250m)": 1,
+        "Contract Feeder (180m)": 0,
+        "Spot Bulk Carrier (220m)": 1,
+        "Spot Tanker (280m)": 1
+      }
+    },
+    "exact_p_optimal_per_shot": 0.03437685854022525,
+    "share_optimal_among_valid": 0.4781144781144781
+  },
+  "metrics_hardware": {
+    "shots": 4000,
+    "distinct_bitstrings": 3549,
+    "share_optimal": 0.00675,
+    "share_valid": 0.01475,
+    "found_optimum": true,
+    "best_energy": -9000.0,
+    "mean_energy": 85251.5,
+    "best_schedule": {
+      "tugs_assigned": {
+        "Tug-01": null,
+        "Tug-02": "Spot Bulk Carrier (220m)",
+        "Tug-03": "Spot Tanker (280m)",
+        "Tug-04": "Contract Container (250m)"
+      },
+      "accepted_spot_ships": [
+        "Spot Bulk Carrier (220m)",
+        "Spot Tanker (280m)"
+      ],
+      "total_tugs_used": 3,
+      "demands": {
+        "Contract Container (250m)": 1,
+        "Contract Feeder (180m)": 0,
+        "Spot Bulk Carrier (220m)": 1,
+        "Spot Tanker (280m)": 1
+      }
+    },
+    "share_optimal_among_valid": 0.4576271186440678
+  },
+  "metrics_run1_hardware": {
+    "shots": 4000,
+    "distinct_bitstrings": 3748,
+    "share_optimal": 0.003,
+    "share_valid": 0.00975,
+    "found_optimum": true,
+    "best_energy": -9000.0,
+    "mean_energy": 105097.0,
+    "best_schedule": {
+      "tugs_assigned": {
+        "Tug-01": "Spot Tanker (280m)",
+        "Tug-02": "Spot Bulk Carrier (220m)",
+        "Tug-03": null,
+        "Tug-04": "Contract Container (250m)"
+      },
+      "accepted_spot_ships": [
+        "Spot Bulk Carrier (220m)",
+        "Spot Tanker (280m)"
+      ],
+      "total_tugs_used": 3,
+      "demands": {
+        "Contract Container (250m)": 1,
+        "Contract Feeder (180m)": 0,
+        "Spot Bulk Carrier (220m)": 1,
+        "Spot Tanker (280m)": 1
+      }
+    },
+    "share_optimal_among_valid": 0.3076923076923077
+  },
+  "metrics_run1_simulator": {
+    "shots": 4000,
+    "distinct_bitstrings": 1830,
+    "share_optimal": 0.03325,
+    "share_valid": 0.08125,
+    "found_optimum": true,
+    "best_energy": -9000.0,
+    "mean_energy": 32236.375,
+    "best_schedule": {
+      "tugs_assigned": {
+        "Tug-01": "Spot Tanker (280m)",
+        "Tug-02": "Spot Bulk Carrier (220m)",
+        "Tug-03": "Contract Container (250m)",
+        "Tug-04": null
+      },
+      "accepted_spot_ships": [
+        "Spot Bulk Carrier (220m)",
+        "Spot Tanker (280m)"
+      ],
+      "total_tugs_used": 3,
+      "demands": {
+        "Contract Container (250m)": 1,
+        "Contract Feeder (180m)": 0,
+        "Spot Bulk Carrier (220m)": 1,
+        "Spot Tanker (280m)": 1
+      }
+    },
+    "share_optimal_among_valid": 0.40923076923076923
+  }
+}

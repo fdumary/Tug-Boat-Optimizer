@@ -1,0 +1,102 @@
+{
+  "instance": {
+    "tugs": 4,
+    "wind_knots": 12.0,
+    "qubits": 18,
+    "optimum_energy": -9000.0,
+    "demands": {
+      "Contract Container (250m)": 1,
+      "Contract Feeder (180m)": 0,
+      "Spot Bulk Carrier (220m)": 1,
+      "Spot Tanker (280m)": 1
+    }
+  },
+  "qaoa": {
+    "p_layers": 1,
+    "tuning": "CVaR(0.1), 8 starts, 100 COBYLA iterations",
+    "params": [
+      0.7747960263332478,
+      2.6446033691031103
+    ],
+    "tuning_seconds_local": 20.292609453201294
+  },
+  "circuit": {
+    "virtual_depth": 25,
+    "transpiled_depth": 308,
+    "two_qubit_gates": 237,
+    "ops": {
+      "sx": 488,
+      "rz": 297,
+      "cz": 237,
+      "measure": 18,
+      "x": 3,
+      "barrier": 3
+    }
+  },
+  "hardware": {
+    "backend": "ibm_fez",
+    "fake": false,
+    "job_id": "dba0j7vi0auc7391b3tg",
+    "max_execution_time_s": 180,
+    "qpu_usage_seconds": 3,
+    "wall_seconds_incl_queue": 10.498077154159546,
+    "options": "dynamical decoupling + gate and measurement twirling"
+  },
+  "metrics_simulator": {
+    "shots": 4000,
+    "distinct_bitstrings": 1830,
+    "share_optimal": 0.03325,
+    "share_valid": 0.08125,
+    "found_optimum": true,
+    "best_energy": -9000.0,
+    "mean_energy": 32236.375,
+    "best_schedule": {
+      "tugs_assigned": {
+        "Tug-01": "Spot Tanker (280m)",
+        "Tug-02": "Spot Bulk Carrier (220m)",
+        "Tug-03": "Contract Container (250m)",
+        "Tug-04": null
+      },
+      "accepted_spot_ships": [
+        "Spot Bulk Carrier (220m)",
+        "Spot Tanker (280m)"
+      ],
+      "total_tugs_used": 3,
+      "demands": {
+        "Contract Container (250m)": 1,
+        "Contract Feeder (180m)": 0,
+        "Spot Bulk Carrier (220m)": 1,
+        "Spot Tanker (280m)": 1
+      }
+    },
+    "exact_p_optimal_per_shot": 0.03458348806199331
+  },
+  "metrics_hardware": {
+    "shots": 4000,
+    "distinct_bitstrings": 3748,
+    "share_optimal": 0.003,
+    "share_valid": 0.00975,
+    "found_optimum": true,
+    "best_energy": -9000.0,
+    "mean_energy": 105097.0,
+    "best_schedule": {
+      "tugs_assigned": {
+        "Tug-01": "Spot Tanker (280m)",
+        "Tug-02": "Spot Bulk Carrier (220m)",
+        "Tug-03": null,
+        "Tug-04": "Contract Container (250m)"
+      },
+      "accepted_spot_ships": [
+        "Spot Bulk Carrier (220m)",
+        "Spot Tanker (280m)"
+      ],
+      "total_tugs_used": 3,
+      "demands": {
+        "Contract Container (250m)": 1,
+        "Contract Feeder (180m)": 0,
+        "Spot Bulk Carrier (220m)": 1,
+        "Spot Tanker (280m)": 1
+      }
+    }
+  }
+}
